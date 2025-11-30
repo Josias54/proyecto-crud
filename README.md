@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Proyecto CRUD - API REST con Docker
 
 ## 📋 Descripción
@@ -152,3 +153,7 @@ La tabla `users` tiene la siguiente estructura:
 - ✅ **Manejo de errores** - Mensajes claros de error y éxito
 - ✅ **Indicador de conexión** - Muestra el estado de conexión a PostgreSQL
 
+=======
+# proyecto-crud
+Ejemplo de un CRUD de 3 servicios
+>>>>>>> c4889ac9dc0c773b6ddf1976befa72a6b97868eb
