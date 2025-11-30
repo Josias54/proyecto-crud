@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API CRUD - Usuarios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .endpoints {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .endpoint-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .method {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+        
+        .method.get { background: #4CAF50; }
+        .method.post { background: #2196F3; }
+        .method.put { background: #FF9800; }
+        .method.delete { background: #f44336; }
+        
+        .url {
+            font-family: 'Courier New', monospace;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            transition: opacity 0.3s;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-primary { background: #2196F3; }
+        .btn-success { background: #4CAF50; }
+        .btn-warning { background: #FF9800; }
+        .btn-danger { background: #f44336; }
+        
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            display: none;
+        }
+        
+        .response.show {
+            display: block;
+        }
+        
+        .response pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .users-list {
+            margin-top: 30px;
+        }
+        
+        .user-card {
+            background: #f0f0f0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .user-info strong {
+            color: #333;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .status.success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 API CRUD - Gestión de Usuarios</h1>
+        <p class="subtitle">API REST para crear, leer, actualizar y eliminar usuarios</p>
+        
+        <div id="dbStatus" style="margin-bottom: 20px; padding: 10px; border-radius: 5px; background: #f0f0f0; text-align: center;">
+            <span id="dbStatusText">Verificando conexión a PostgreSQL...</span>
+        </div>
+        
+        <div class="endpoints">
+            <!-- GET ALL -->
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/users</span>
+                </div>
+                <p class="description">Obtener todos los usuarios</p>
+                <button class="btn-success" onclick="getAllUsers()">Obtener Usuarios</button>
+            </div>
+            
+            <!-- GET BY ID -->
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="url">/api/users/:id</span>
+                </div>
+                <p class="description">Obtener un usuario por ID</p>
+                <div class="form-group">
+                    <label>ID del usuario:</label>
+                    <input type="number" id="getUserId" placeholder="Ej: 1" min="1">
+                </div>
+                <button class="btn-success" onclick="getUserById()">Obtener Usuario</button>
+            </div>
+            
+            <!-- POST -->
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method post">POST</span>
+                    <span class="url">/api/users</span>
+                </div>
+                <p class="description">Crear un nuevo usuario</p>
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="postNombre" placeholder="Ej: Juan">
+                </div>
+                <div class="form-group">
+                    <label>Correo:</label>
+                    <input type="email" id="postCorreo" placeholder="Ej: juan@mail.com">
+                </div>
+                <button class="btn-primary" onclick="createUser()">Crear Usuario</button>
+            </div>
+            
+            <!-- PUT -->
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method put">PUT</span>
+                    <span class="url">/api/users/:id</span>
+                </div>
+                <p class="description">Actualizar un usuario</p>
+                <div class="form-group">
+                    <label>ID del usuario:</label>
+                    <input type="number" id="putUserId" placeholder="Ej: 1" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <input type="text" id="putNombre" placeholder="Ej: Juan Actualizado">
+                </div>
+                <div class="form-group">
+                    <label>Correo:</label>
+                    <input type="email" id="putCorreo" placeholder="Ej: juan.actualizado@mail.com">
+                </div>
+                <button class="btn-warning" onclick="updateUser()">Actualizar Usuario</button>
+            </div>
+            
+            <!-- DELETE -->
+            <div class="endpoint-card">
+                <div class="endpoint-header">
+                    <span class="method delete">DELETE</span>
+                    <span class="url">/api/users/:id</span>
+                </div>
+                <p class="description">Eliminar un usuario</p>
+                <div class="form-group">
+                    <label>ID del usuario:</label>
+                    <input type="number" id="deleteUserId" placeholder="Ej: 1" min="1">
+                </div>
+                <button class="btn-danger" onclick="deleteUser()">Eliminar Usuario</button>
+            </div>
+        </div>
+        
+        <div class="response" id="response">
+            <h3>Respuesta:</h3>
+            <pre id="responseContent"></pre>
+        </div>
+        
+        <div class="users-list" id="usersList"></div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api';
+        
+        function showResponse(data, isError = false) {
+            const responseDiv = document.getElementById('response');
+            const responseContent = document.getElementById('responseContent');
+            responseDiv.classList.add('show');
+            responseContent.textContent = JSON.stringify(data, null, 2);
+            responseDiv.style.borderLeftColor = isError ? '#f44336' : '#4CAF50';
+            
+            // Auto-refresh users list after successful operations
+            if (!isError && (data.success || data.id || data.message)) {
+                setTimeout(() => getAllUsers(), 500);
+            }
+            
+            // Scroll to response
+            responseDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        async function getAllUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/users`);
+                const data = await response.json();
+                showResponse(data);
+                displayUsers(data);
+            } catch (error) {
+                showResponse({ error: error.message }, true);
+            }
+        }
+        
+        async function getUserById() {
+            const id = document.getElementById('getUserId').value;
+            if (!id) {
+                showResponse({ error: 'Por favor ingresa un ID' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/${id}`);
+                const data = await response.json();
+                showResponse(data);
+            } catch (error) {
+                showResponse({ error: error.message }, true);
+            }
+        }
+        
+        async function createUser() {
+            const nombre = document.getElementById('postNombre').value.trim();
+            const correo = document.getElementById('postCorreo').value.trim();
+            
+            if (!nombre || !correo) {
+                showResponse({ error: 'Por favor completa todos los campos' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nombre, correo })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showResponse(data, true);
+                } else {
+                    showResponse({ 
+                        success: true, 
+                        message: 'Usuario creado exitosamente',
+                        usuario: data 
+                    }, false);
+                    // Limpiar campos
+                    document.getElementById('postNombre').value = '';
+                    document.getElementById('postCorreo').value = '';
+                    // Recargar lista de usuarios
+                    setTimeout(() => getAllUsers(), 500);
+                }
+            } catch (error) {
+                showResponse({ error: 'Error al crear usuario: ' + error.message }, true);
+            }
+        }
+        
+        async function updateUser() {
+            const id = document.getElementById('putUserId').value.trim();
+            const nombre = document.getElementById('putNombre').value.trim();
+            const correo = document.getElementById('putCorreo').value.trim();
+            
+            if (!id || !nombre || !correo) {
+                showResponse({ error: 'Por favor completa todos los campos (ID, Nombre y Correo)' }, true);
+                return;
+            }
+            
+            const userId = parseInt(id, 10);
+            if (isNaN(userId)) {
+                showResponse({ error: 'El ID debe ser un número válido' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nombre, correo })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showResponse(data, true);
+                } else {
+                    showResponse({ 
+                        success: true, 
+                        message: 'Usuario actualizado exitosamente',
+                        usuario: data 
+                    }, false);
+                    // Limpiar campos
+                    document.getElementById('putUserId').value = '';
+                    document.getElementById('putNombre').value = '';
+                    document.getElementById('putCorreo').value = '';
+                    // Recargar lista de usuarios
+                    setTimeout(() => getAllUsers(), 500);
+                }
+            } catch (error) {
+                showResponse({ error: 'Error al actualizar usuario: ' + error.message }, true);
+            }
+        }
+        
+        async function deleteUser() {
+            const id = document.getElementById('deleteUserId').value.trim();
+            if (!id) {
+                showResponse({ error: 'Por favor ingresa un ID' }, true);
+                return;
+            }
+            
+            const userId = parseInt(id, 10);
+            if (isNaN(userId)) {
+                showResponse({ error: 'El ID debe ser un número válido' }, true);
+                return;
+            }
+            
+            if (!confirm(`¿Estás seguro de eliminar el usuario con ID ${userId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showResponse(data, true);
+                } else {
+                    showResponse({ 
+                        success: true, 
+                        message: data.message || 'Usuario eliminado exitosamente'
+                    }, false);
+                    // Limpiar campo
+                    document.getElementById('deleteUserId').value = '';
+                    // Recargar lista de usuarios
+                    setTimeout(() => getAllUsers(), 500);
+                }
+            } catch (error) {
+                showResponse({ error: 'Error al eliminar usuario: ' + error.message }, true);
+            }
+        }
+        
+        function displayUsers(users) {
+            const usersList = document.getElementById('usersList');
+            if (!Array.isArray(users) || users.length === 0) {
+                usersList.innerHTML = '<p style="text-align: center; color: #666;">No hay usuarios registrados. Crea uno nuevo usando el formulario POST arriba.</p>';
+                return;
+            }
+            
+            usersList.innerHTML = '<h2>📋 Lista de Usuarios</h2>';
+            users.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.innerHTML = `
+                    <div class="user-info">
+                        <strong>ID:</strong> ${user.id}<br>
+                        <strong>Nombre:</strong> ${user.nombre}<br>
+                        <strong>Correo:</strong> ${user.correo}
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="loadUserForEdit(${user.id}, ${JSON.stringify(user.nombre)}, ${JSON.stringify(user.correo)})">Editar</button>
+                        <button class="btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="quickDeleteUser(${user.id})">Eliminar</button>
+                    </div>
+                `;
+                usersList.appendChild(userCard);
+            });
+        }
+        
+        function loadUserForEdit(id, nombre, correo) {
+            document.getElementById('putUserId').value = id;
+            document.getElementById('putNombre').value = nombre;
+            document.getElementById('putCorreo').value = correo;
+            // Scroll to PUT form
+            document.querySelector('.endpoint-card:nth-of-type(4)').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function quickDeleteUser(id) {
+            if (confirm(`¿Estás seguro de eliminar el usuario con ID ${id}?`)) {
+                document.getElementById('deleteUserId').value = id;
+                deleteUser();
+            }
+        }
+        
+        // Verificar estado de la conexión a PostgreSQL
+        async function checkDatabaseStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                const statusDiv = document.getElementById('dbStatus');
+                const statusText = document.getElementById('dbStatusText');
+                
+                if (data.status === 'ok') {
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.border = '2px solid #28a745';
+                    statusText.innerHTML = `✅ <strong>Conectado a PostgreSQL</strong> - Base de datos: ${data.database.database} (${data.database.host})`;
+                } else {
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.border = '2px solid #dc3545';
+                    statusText.innerHTML = `❌ <strong>Error de conexión:</strong> ${data.message}`;
+                }
+            } catch (error) {
+                const statusDiv = document.getElementById('dbStatus');
+                const statusText = document.getElementById('dbStatusText');
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.border = '2px solid #dc3545';
+                statusText.innerHTML = `❌ <strong>No se pudo conectar a la API</strong>: ${error.message}`;
+            }
+        }
+        
+        // Load users on page load
+        window.onload = () => {
+            checkDatabaseStatus();
+            getAllUsers();
+        };
+    </script>
+</body>
+</html>
+

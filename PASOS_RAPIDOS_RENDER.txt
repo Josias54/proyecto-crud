@@ -1,0 +1,57 @@
+═══════════════════════════════════════════════════════════════
+  🚀 PASOS RÁPIDOS PARA SUBIR A RENDER
+═══════════════════════════════════════════════════════════════
+
+1️⃣ SUBIR CÓDIGO A GITHUB
+   - Crea un repositorio en GitHub
+   - Sube tu código:
+     git init
+     git add .
+     git commit -m "Listo para Render"
+     git remote add origin <TU_URL_DE_GITHUB>
+     git push -u origin main
+
+2️⃣ CREAR BASE DE DATOS EN RENDER
+   - Ve a: https://dashboard.render.com/
+   - Click en "New +" → "PostgreSQL"
+   - Name: crud-db
+   - Database: crud_db
+   - Plan: Free
+   - Click "Create Database"
+   - ⚠️ COPIA las credenciales (las necesitarás después)
+
+3️⃣ CREAR SERVICIO WEB EN RENDER
+   - Click en "New +" → "Web Service"
+   - Conecta tu repositorio de GitHub
+   - Configuración:
+     * Name: api-crud
+     * Root Directory: proyecto-crud/api-service
+     * Environment: Node
+     * Build Command: npm install
+     * Start Command: node server.js
+   
+4️⃣ CONFIGURAR VARIABLES DE ENTORNO
+   En el servicio web, ve a "Environment" y agrega:
+   
+   PORT=10000
+   DB_HOST=<el_host_de_tu_postgresql>
+   DB_PORT=5432
+   POSTGRES_DB=crud_db
+   POSTGRES_USER=<tu_usuario>
+   POSTGRES_PASSWORD=<tu_password>
+   
+   (Usa los valores que copiaste en el paso 2)
+
+5️⃣ DESPLEGAR
+   - Click en "Create Web Service"
+   - Espera 2-5 minutos
+   - Render te dará una URL como: https://api-crud.onrender.com
+
+6️⃣ PROBAR
+   - Abre: https://api-crud.onrender.com/api/health
+   - Debe mostrar: {"status":"ok",...}
+
+═══════════════════════════════════════════════════════════════
+  📖 Para más detalles, lee: DEPLOY_RENDER.md
+═══════════════════════════════════════════════════════════════
+

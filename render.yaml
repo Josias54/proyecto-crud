@@ -1,0 +1,41 @@
+# ============================================
+# Configuración de Render para despliegue
+# ============================================
+# Este archivo permite desplegar múltiples servicios desde un solo repositorio
+
+services:
+  # Servicio Web para la API
+  - type: web
+    name: api-crud
+    env: node
+    plan: free  # Cambia a 'starter' o 'standard' para producción
+    region: oregon  # Cambia según tu región preferida
+    buildCommand: npm install
+    startCommand: node server.js
+    rootDir: proyecto-crud/api-service
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # Las siguientes variables deben configurarse manualmente en el Dashboard
+      # porque contienen información sensible
+      - key: DB_HOST
+        sync: false  # Debes configurarlo manualmente
+      - key: DB_PORT
+        value: 5432
+      - key: POSTGRES_DB
+        sync: false  # Debes configurarlo manualmente
+      - key: POSTGRES_USER
+        sync: false  # Debes configurarlo manualmente
+      - key: POSTGRES_PASSWORD
+        sync: false  # Debes configurarlo manualmente
+
+databases:
+  # Base de datos PostgreSQL
+  - name: crud-db
+    plan: free  # Cambia según tus necesidades
+    databaseName: crud_db
+    user: postgres
+    region: oregon  # Debe ser la misma región que el servicio web
+
