@@ -12,17 +12,33 @@ app.use(cors()); // Permitir peticiones desde otros dominios
 app.use(express.json()); // Leer JSON del body
 
 // Configuración de base de datos desde variables de entorno
-const dbConfig = {
-  host: process.env.DB_HOST || 'postgres-db',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.POSTGRES_DB || 'crud_db',
-  user: process.env.POSTGRES_USER || 'postgres',
-  password: process.env.POSTGRES_PASSWORD || 'postgres',
-  // Configuración del pool para mejor manejo de conexiones
-  max: 20, // máximo de conexiones en el pool
-  idleTimeoutMillis: 30000, // tiempo antes de cerrar conexiones inactivas
-  connectionTimeoutMillis: 2000, // tiempo máximo para obtener una conexión
-};
+// Soporta tanto DATABASE_URL (URL completa) como variables individuales
+let dbConfig;
+
+if (process.env.DATABASE_URL) {
+  // Si existe DATABASE_URL, usarla directamente (formato de Render)
+  dbConfig = {
+    connectionString: process.env.DATABASE_URL,
+    // Configuración del pool para mejor manejo de conexiones
+    max: 20, // máximo de conexiones en el pool
+    idleTimeoutMillis: 30000, // tiempo antes de cerrar conexiones inactivas
+    connectionTimeoutMillis: 2000, // tiempo máximo para obtener una conexión
+    ssl: process.env.DATABASE_URL.includes('render.com') ? { rejectUnauthorized: false } : false
+  };
+} else {
+  // Si no existe DATABASE_URL, usar variables individuales
+  dbConfig = {
+    host: process.env.DB_HOST || 'postgres-db',
+    port: parseInt(process.env.DB_PORT) || 5432,
+    database: process.env.POSTGRES_DB || 'crud_db',
+    user: process.env.POSTGRES_USER || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || 'postgres',
+    // Configuración del pool para mejor manejo de conexiones
+    max: 20, // máximo de conexiones en el pool
+    idleTimeoutMillis: 30000, // tiempo antes de cerrar conexiones inactivas
+    connectionTimeoutMillis: 2000, // tiempo máximo para obtener una conexión
+  };
+}
 
 // Variable para el pool (se inicializará después de verificar conexión)
 let pool;
